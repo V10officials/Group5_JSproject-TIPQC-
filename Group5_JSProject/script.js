@@ -192,6 +192,22 @@ function getProduct(id) {
 }
 
 
+/* ---------- Product images (shared by shop + wishlist) ---------- */
+
+const PRODUCT_IMAGES = {
+  basketball: "Basketballs/ball1.png",
+  jersey: "Jerseys/jersey1.png",
+  shoes: "Shoes/shoes1.png",
+  gear: "Gears/gear1.png",
+  "resistance-bands": "Gears/gear1.png"
+};
+
+
+function getProductImage(product) {
+  return PRODUCT_IMAGES[product.id] || "";
+}
+
+
 /* ---------- Cart ---------- */
 
 const CART_KEY = "sportshub_cart";
@@ -334,6 +350,54 @@ function updateCartBadge() {
 }
 
 
+/* ---------- Add to Cart button (checkmark feedback) ---------- */
+
+/* Green "added" style, injected here so no CSS file edit is needed */
+(function () {
+  const style = document.createElement("style");
+  style.textContent = `
+    .add-cart-btn.added {
+      background: #2e9e5b;
+      border-color: #2e9e5b;
+      color: #fff;
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+
+function addProductToCart(id, btn) {
+
+  const product = getProduct(id);
+  if (!product) return;
+
+  const size =
+    product.sizes && product.sizes.length
+      ? product.sizes[0]
+      : "One Size";
+
+  addToCart(id, 1, size);   // also updates the cart badge
+
+  if (!btn) return;
+
+  /* SHOW CHECKMARK */
+  clearTimeout(btn._timer);
+
+  if (!btn.dataset.original) {
+    btn.dataset.original = btn.innerHTML;
+  }
+
+  btn.innerHTML = "&#10003; Added";
+  btn.classList.add("added");
+
+  btn._timer = setTimeout(function () {
+    btn.innerHTML = btn.dataset.original;
+    btn.classList.remove("added");
+  }, 1500);
+
+}
+
+
 /* ---------- Wishlist ---------- */
 
 const WISHLIST_KEY = "sportshub_wishlist";
@@ -410,6 +474,51 @@ function updateWishlistBadge() {
 
   badge.style.display =
     n > 0 ? "flex" : "none";
+}
+
+
+/* ---------- Wishlist button (heart on product cards) ---------- */
+
+(function () {
+  const style = document.createElement("style");
+  style.textContent = `
+    .card { position: relative; }
+    .wish-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 2;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.92);
+      color: #555;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      transition: transform 0.15s ease, color 0.15s ease;
+    }
+    .wish-btn:hover { transform: scale(1.1); }
+    .wish-btn.active { color: #e0245e; }
+  `;
+  document.head.appendChild(style);
+})();
+
+
+function toggleWishBtn(id, btn) {
+  const wished = toggleWishlist(id);   // also updates the wishlist badge
+
+  btn.classList.toggle("active", wished);
+  btn.innerHTML = wished ? "&#9829;" : "&#9825;";
+  btn.setAttribute(
+    "aria-label",
+    wished ? "Remove from wishlist" : "Add to wishlist"
+  );
 }
 
 

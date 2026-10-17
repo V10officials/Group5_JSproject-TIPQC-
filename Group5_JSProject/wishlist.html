@@ -36,6 +36,15 @@
   renderHeader("Wishlist");
   renderFooter();
 
+  /* Same image as the shop; falls back to the SVG icon if there isn't one */
+  function wishImage(p){
+    const src = getProductImage(p);
+    if (src){
+      return `<img src="${src}" alt="${p.name}" class="prod-img" style="width:100%;height:100%;object-fit:contain;">`;
+    }
+    return ICONS[p.icon] || "";
+  }
+
   function renderWishlist(){
     const products = wishlistProducts();
     const itemsEl = document.getElementById("wish-items");
@@ -52,17 +61,17 @@
 
     itemsEl.innerHTML = products.map(p => `
       <div class="cart-row">
-        <a href="${p.id === 'basketball' ? 'product.html' : `product.html?id=${p.id}`}" class="cart-thumb">
-          <img src="images/${p.icon}.jpg" alt="${p.name}" class="prod-img">
+        <a href="product.html?id=${p.id}" class="cart-thumb">
+          ${wishImage(p)}
         </a>
         <div class="cart-item-info">
           <div class="cart-item-cat">${p.category}</div>
-          <div class="cart-item-name"><a href="${p.id === 'basketball' ? 'product.html' : `product.html?id=${p.id}`}" style="color:inherit;">${p.name}</a></div>
+          <div class="cart-item-name"><a href="product.html?id=${p.id}" style="color:inherit;">${p.name}</a></div>
           <div class="cart-item-meta">${fmt(p.price)}</div>
           <button class="remove-link" onclick="removeFromWishlist('${p.id}'); renderWishlist();">Remove</button>
         </div>
         <div class="cart-item-right">
-          <button class="btn btn-primary btn-sm" onclick="addToCart('${p.id}',1,null); this.textContent='Added ✓'; setTimeout(()=>{this.textContent='Add to Cart';},1200);">Add to Cart</button>
+          <button class="btn btn-primary btn-sm" onclick="addToCart('${p.id}',1,'${p.sizes && p.sizes.length ? p.sizes[0] : "One Size"}'); this.textContent='Added ✓'; setTimeout(()=>{this.textContent='Add to Cart';},1200);">Add to Cart</button>
         </div>
       </div>
     `).join("");

@@ -42,7 +42,6 @@
             <input type="checkbox" value="Sports Gear" checked>
             <span>Sports Gear</span>
           </label>
-
         </div>
 
         <!-- PRICE RANGE -->
@@ -96,28 +95,11 @@
 
         <!-- CATEGORY TABS -->
         <div class="tabs">
-
-          <button class="tab-btn active" data-category="All">
-            All
-          </button>
-
-          <button class="tab-btn" data-category="Basketballs">
-            Basketballs
-          </button>
-
-          <button class="tab-btn" data-category="Jerseys">
-            Jerseys
-          </button>
-
-          <button class="tab-btn" data-category="Shoes">
-            Shoes
-          </button>
-
-          <button class="tab-btn" data-category="Sports Gear">
-            Sports Gear
-          </button>
-
-
+          <button class="tab-btn active" data-category="All">All</button>
+          <button class="tab-btn" data-category="Basketballs">Basketballs</button>
+          <button class="tab-btn" data-category="Jerseys">Jerseys</button>
+          <button class="tab-btn" data-category="Shoes">Shoes</button>
+          <button class="tab-btn" data-category="Sports Gear">Sports Gear</button>
         </div>
 
 
@@ -144,21 +126,10 @@
     /* PRODUCT IMAGES */
     function getShopImage(product) {
 
-      if (product.id === "basketball") {
-        return "Basketballs/ball1.png";
-      }
-
-      if (product.id === "jersey") {
-        return "Jerseys/jersey1.png";
-      }
-
-      if (product.id === "shoes") {
-        return "Shoes/shoes1.png";
-      }
-
-      if (product.id === "gear") {
-        return "Gears/gear1.png";
-      }
+      if (product.id === "basketball") return "Basketballs/ball1.png";
+      if (product.id === "jersey") return "Jerseys/jersey1.png";
+      if (product.id === "shoes") return "Shoes/shoes1.png";
+      if (product.id === "gear") return "Gears/gear1.png";
 
       return "";
 
@@ -169,51 +140,39 @@
     function renderShop() {
 
       const grid = document.getElementById("shop-grid");
-
       const priceRange = document.getElementById("price-range");
-
       const maxPrice = Number(priceRange.value);
 
 
       /* ONLY SHOW THESE 4 PRODUCTS */
       let list = PRODUCTS.filter(product =>
-
         (
           product.id === "basketball" ||
           product.id === "jersey" ||
           product.id === "shoes" ||
           product.id === "gear"
         )
-
         && product.price <= maxPrice
-
       );
 
 
       /* CATEGORY FILTER */
       if (selectedCategory !== "All") {
-
         list = list.filter(product =>
           product.category === selectedCategory
         );
-
       }
 
 
       /* CHECKBOX FILTER */
       const checkedCategories = Array.from(
-        document.querySelectorAll(
-          '.checkbox-row input:checked'
-        )
+        document.querySelectorAll('.checkbox-row input:checked')
       ).map(input => input.value);
 
-
       if (selectedCategory === "All") {
-
         list = list.filter(product =>
           checkedCategories.includes(product.category)
         );
-
       }
 
 
@@ -221,23 +180,15 @@
       const sort = document.getElementById("sort-select").value;
 
       if (sort === "price-low") {
-
         list.sort((a, b) => a.price - b.price);
-
       }
 
       if (sort === "price-high") {
-
         list.sort((a, b) => b.price - a.price);
-
       }
 
       if (sort === "name") {
-
-        list.sort((a, b) =>
-          a.name.localeCompare(b.name)
-        );
-
+        list.sort((a, b) => a.name.localeCompare(b.name));
       }
 
 
@@ -245,11 +196,7 @@
       grid.innerHTML = list.map((product, index) => {
 
         const image = getShopImage(product);
-
-        const bgClass =
-          index % 2 === 0
-            ? "bg-a"
-            : "bg-b";
+        const bgClass = index % 2 === 0 ? "bg-a" : "bg-b";
 
         return `
 
@@ -270,6 +217,13 @@
 
             </a>
 
+            <button
+              type="button"
+              class="wish-btn ${isWished(product.id) ? "active" : ""}"
+              onclick="toggleWishBtn('${product.id}', this)"
+              aria-label="${isWished(product.id) ? "Remove from wishlist" : "Add to wishlist"}"
+            >${isWished(product.id) ? "&#9829;" : "&#9825;"}</button>
+
 
             <div class="card-body">
 
@@ -285,7 +239,7 @@
 
                 <button
                   class="add-cart-btn"
-                  onclick="addProductToCart('${product.id}')"
+                  onclick="addProductToCart('${product.id}', this)"
                 >
                   Add to Cart
                 </button>
@@ -303,53 +257,24 @@
 
       /* EMPTY RESULT */
       if (list.length === 0) {
-
         grid.innerHTML = `
           <p style="color: var(--text-muted);">
             No products found in this price range.
           </p>
         `;
-
       }
 
     }
 
 
-    /* ADD TO CART */
-    function addProductToCart(id) {
-
-      const product = getProduct(id);
-
-      if (!product) return;
-
-      const size =
-        product.sizes && product.sizes.length
-          ? product.sizes[0]
-          : "One Size";
-
-      addToCart(id, 1, size);
-
-      renderShop();
-
-    }
-
-
     /* PRICE SLIDER */
-    const priceRange =
-      document.getElementById("price-range");
-
-    const priceValue =
-      document.getElementById("price-value");
-
+    const priceRange = document.getElementById("price-range");
+    const priceValue = document.getElementById("price-value");
 
     priceRange.addEventListener("input", function () {
-
       const value = Number(this.value);
-
       priceValue.textContent = "$" + value;
-
       renderShop();
-
     });
 
 
@@ -357,13 +282,7 @@
     document
       .querySelectorAll('.checkbox-row input')
       .forEach(input => {
-
-        input.addEventListener("change", function () {
-
-          renderShop();
-
-        });
-
+        input.addEventListener("change", renderShop);
       });
 
 
@@ -376,14 +295,11 @@
 
           document
             .querySelectorAll(".tab-btn")
-            .forEach(btn =>
-              btn.classList.remove("active")
-            );
+            .forEach(btn => btn.classList.remove("active"));
 
           this.classList.add("active");
 
-          selectedCategory =
-            this.dataset.category;
+          selectedCategory = this.dataset.category;
 
           renderShop();
 
@@ -403,38 +319,24 @@
       .getElementById("clear-filters")
       .addEventListener("click", function () {
 
-        /* CHECK ALL CATEGORIES */
         document
           .querySelectorAll('.checkbox-row input')
-          .forEach(input => {
-            input.checked = true;
-          });
+          .forEach(input => { input.checked = true; });
 
-
-        /* RESET PRICE */
         priceRange.value = 200;
-
         priceValue.textContent = "$200";
 
-
-        /* RESET CATEGORY */
         selectedCategory = "All";
 
         document
           .querySelectorAll(".tab-btn")
-          .forEach(btn =>
-            btn.classList.remove("active")
-          );
+          .forEach(btn => btn.classList.remove("active"));
 
         document
           .querySelector('.tab-btn[data-category="All"]')
           .classList.add("active");
 
-
-        /* RESET SORT */
-        document.getElementById("sort-select").value =
-          "default";
-
+        document.getElementById("sort-select").value = "default";
 
         renderShop();
 
