@@ -83,6 +83,21 @@ function hideError(el) {
 }
 
 
+function showSuccess(beforeEl, message) {
+  const note = document.createElement("p");
+
+  note.className = "auth-success";
+  note.textContent = message;
+
+  note.style.cssText =
+    "background:#e6f6ec;color:#1e7a45;border:1px solid #b7e3c8;" +
+    "border-radius:8px;padding:10px 12px;margin:0 0 14px;" +
+    "font-size:14px;";
+
+  beforeEl.parentNode.insertBefore(note, beforeEl);
+}
+
+
 /* ============================================================
    LOGIN PAGE
    ============================================================ */
@@ -94,13 +109,38 @@ if (loginForm) {
   // If already logged in, skip straight to the account page.
   if (getUser()) window.location.href = "account.html";
 
+  const errorEl = document.getElementById("login-error");
+
+  // Message + prefilled email after signing up / resetting a password
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.get("signup") === "success") {
+    showSuccess(
+      errorEl,
+      "Account created successfully! Please log in."
+    );
+  }
+
+  if (params.get("reset") === "success") {
+    showSuccess(
+      errorEl,
+      "Password reset successfully! Please log in with your new password."
+    );
+  }
+
+  const prefill = params.get("email");
+
+  if (prefill) {
+    document.getElementById("login-email").value = prefill;
+  }
+
+
   loginForm.addEventListener("submit", (e) => {
 
     e.preventDefault();
 
     const email = document.getElementById("login-email").value.trim();
     const password = document.getElementById("login-password").value;
-    const errorEl = document.getElementById("login-error");
 
     if (!email.includes("@") || password.length < 6) {
       showError(
@@ -186,9 +226,9 @@ if (signupForm) {
     // Demo-only auth: saved locally in this browser, no real backend.
     addAccount({ name, email, password });
 
-    setUser({ name, email });
-
-    window.location.href = "account.html";
+    // Do NOT log the user in here. Send them to the login page instead.
+    window.location.href =
+      "login.html?signup=success&email=" + encodeURIComponent(email);
 
   });
 
@@ -267,6 +307,14 @@ if (stepEmail) {
     if (!updateAccountPassword(resetEmail, newPass)) {
       showError(resetError, "Something went wrong. Please start again.");
       return;
+    }
+
+    // Make the "Go to Log In" button carry the email and success message
+    const loginBtn = document.getElementById("go-login");
+
+    if (loginBtn) {
+      loginBtn.href =
+        "login.html?reset=success&email=" + encodeURIComponent(resetEmail);
     }
 
     stepReset.style.display = "none";
