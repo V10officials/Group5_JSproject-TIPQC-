@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us — SportsHub</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .sent-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 100;
+  }
+
+  .sent-overlay.show {
+    display: flex;
+  }
+
+  .sent-modal {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+    animation: sent-pop 0.2s ease;
+  }
+
+  .sent-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: #1a1200;
+    font-size: 32px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sent-modal h2 {
+    margin: 0 0 8px;
+    font-size: 24px;
+  }
+
+  .sent-modal p {
+    margin: 0 0 24px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  @keyframes sent-pop {
+    from { transform: scale(0.92); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+  }
+</style>
+
+</head>
+<body>
+
+<header class="site-header" id="site-header"></header>
+
+<main>
+  <div class="wrap contact-wrap">
+    <div class="contact-head">
+      <p class="eyebrow">Get in Touch</p>
+      <h1 style="font-size:32px;">We're Here to Help</h1>
+      <p>Questions about an order, product, or bulk team request? Send it over — our crew replies within one business day.</p>
+    </div>
+
+    <div class="contact-grid">
+      <div>
+        <div class="info-box"><div class="lbl">Email</div>support@sportshub.com</div>
+        <div class="info-box"><div class="lbl">Phone</div>(+63) 912-345-6789</div>
+        <div class="info-box"><div class="lbl">Studio</div>142 Aurora Ave,Qc</div>
+        <div class="info-box"><div class="lbl">Hours</div>Mon–Fri, 9am–6pm CT</div>
+      </div>
+
+      <div class="form-card">
+        <form id="contact-form">
+          <div class="form-row">
+            <div class="field">
+              <label>Full Name</label>
+              <input type="text" name="from_name" placeholder="Full Name" required>
+            </div>
+            <div class="field">
+              <label>Email</label>
+              <input type="email" name="from_email" placeholder="sportshub@email.com" required>
+            </div>
+          </div>
+
+          <div class="field" style="margin-bottom:20px;">
+            <label>Subject</label>
+            <input type="text" name="subject" placeholder="Order Question">
+          </div>
+
+          <div class="field" style="margin-bottom:22px;">
+            <label>Message</label>
+            <textarea name="message" placeholder="Tell us what you need..." required></textarea>
+          </div>
+
+          <p id="contact-status" style="display:none;font-size:13px;margin:0 0 14px;"></p>
+
+          <button type="submit" class="btn btn-primary btn-block">Send Message</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer" id="site-footer"></footer>
+
+<!-- MESSAGE SENT POPUP -->
+<div class="sent-overlay" id="sent-overlay">
+  <div class="sent-modal" role="dialog" aria-modal="true" aria-labelledby="sent-title">
+    <div class="sent-icon">&#10003;</div>
+    <h2 id="sent-title">Message Sent!</h2>
+    <p>Thanks for reaching out. Our crew will reply within one business day.</p>
+    <button type="button" class="btn btn-primary btn-block" id="sent-close">Done</button>
+  </div>
+</div>
+
+<!-- EmailJS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<script src="script.js"></script>
+<script>
+  renderHeader("Contact Us");
+  renderFooter();
+
+
+  /* 
+     EMAILJS SETTINGS
+     (EmailJS dashboard → Account / Email Services / Email Templates)
+   */
+
+  const EMAILJS_PUBLIC_KEY  = "AOyN4K-m0PobezY_c";
+  const EMAILJS_SERVICE_ID  = "service_ud8n637";
+  const EMAILJS_TEMPLATE_ID = "template_ps4oryf";
+
+  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+
+  const form   = document.getElementById("contact-form");
+  const status = document.getElementById("contact-status");
+
+
+  /* ---------- "Message Sent" popup ---------- */
+
+  const sentOverlay = document.getElementById("sent-overlay");
+
+  function openSentPopup() {
+    sentOverlay.classList.add("show");
+  }
+
+  function closeSentPopup() {
+    sentOverlay.classList.remove("show");
+  }
+
+  document.getElementById("sent-close").addEventListener("click", closeSentPopup);
+
+  sentOverlay.addEventListener("click", (e) => {
+    if (e.target === sentOverlay) closeSentPopup();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeSentPopup();
+  });
+
+
+  function showStatus(message, isError) {
+    status.textContent = message;
+    status.style.color = isError ? "#e05252" : "#7bc47f";
+    status.style.display = "block";
+  }
+
+
+  form.addEventListener("submit", (e) => {
+
+    e.preventDefault();
+
+    const btn = form.querySelector("button[type=submit]");
+
+    btn.disabled = true;
+    btn.textContent = "Sending...";
+    status.style.display = "none";
+
+    emailjs
+      .sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, form)
+
+      .then(() => {
+
+        btn.textContent = "Message Sent ✓";
+        openSentPopup();
+        form.reset();
+
+        setTimeout(() => {
+          btn.textContent = "Send Message";
+          btn.disabled = false;
+        }, 2500);
+
+      })
+
+      .catch((error) => {
+
+        console.error("EmailJS error:", error);
+
+        btn.textContent = "Send Message";
+        btn.disabled = false;
+
+        const reason = (error && (error.text || error.message)) || "Unknown error";
+
+        showStatus("Sorry, your message could not be sent. (" + reason + ")", true);
+
+      });
+
+  });
+</script>
+</body>
+</html>

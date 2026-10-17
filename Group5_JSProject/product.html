@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product — SportsHub</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<header class="site-header" id="site-header"></header>
+
+<main>
+
+  <div class="wrap" style="padding-top:26px;">
+    <div class="breadcrumb" id="crumb"></div>
+  </div>
+
+  <div class="wrap product-detail" id="product-detail"></div>
+
+</main>
+
+<footer class="footer" id="site-footer"></footer>
+
+<script src="script.js"></script>
+
+<script>
+
+renderHeader("Products");
+renderFooter();
+
+const params = new URLSearchParams(window.location.search);
+const productId = params.get("id") || "basketball";
+
+const p = getProduct(productId) || getProduct("basketball");
+
+document.getElementById("crumb").innerHTML = `
+  <a href="index.html">Home</a> /
+  <a href="shop.html">Shop</a> /
+  <a href="shop.html">${p.category}</a> /
+  <strong>${p.name}</strong>
+`;
+
+document.title = p.name + " — SportsHub";
+
+let selectedSize = p.sizes[Math.min(1, p.sizes.length - 1)];
+let qty = 1;
+let wished = isWished(p.id);
+let activeTab = "Description";
+
+
+/* ================================
+   PRODUCT IMAGE PATH
+================================ */
+
+function getProductImageFolder() {
+
+  if (p.icon === "basketball") {
+    return "Basketballs";
+  }
+
+  if (p.icon === "gear") {
+    return "Gears";
+  }
+
+  if (p.icon === "jersey") {
+    return "Jerseys";
+  }
+
+  if (p.icon === "shoes") {
+    return "Shoes";
+  }
+
+  return "";
+}
+
+
+function getProductImageName() {
+
+  if (p.icon === "basketball") {
+    return "ball";
+  }
+
+  return p.icon;
+}
+
+
+/* ================================
+   RENDER PRODUCT
+================================ */
+
+function renderDetail() {
+
+  const folder = getProductImageFolder();
+  const imageName = getProductImageName();
+
+  document.getElementById("product-detail").innerHTML = `
+
+    <div>
+
+      <div class="pd-main-img">
+
+        <img
+          id="main-product-image"
+          src="${folder}/${imageName}1.png"
+          alt="${p.name}"
+          class="prod-img"
+        >
+
+      </div>
+
+
+      <div class="thumb-row">
+
+        ${[1,2,3,4].map(i => `
+
+          <div class="thumb ${i === 1 ? "active" : ""}">
+
+            <img
+              src="${folder}/${imageName}${i}.png"
+              alt="${p.name} view ${i}"
+              class="prod-img"
+            >
+
+          </div>
+
+        `).join("")}
+
+      </div>
+
+    </div>
+
+
+    <div>
+
+      <p class="eyebrow">
+        ${p.category}
+      </p>
+
+
+      <h1 class="pd-title">
+        ${p.name}
+      </h1>
+
+
+      <div class="pd-rating">
+
+        ${"★".repeat(Math.round(p.rating))}
+        ${"☆".repeat(5 - Math.round(p.rating))}
+
+        ${p.rating}
+
+        <span>
+          (${p.reviews} reviews)
+        </span>
+
+      </div>
+
+
+      <p class="pd-desc">
+        ${p.desc}
+      </p>
+
+
+      <div class="pd-price-row">
+
+        <span class="price-current">
+          ${fmt(p.price)}
+        </span>
+
+        ${
+          p.oldPrice
+          ? `
+            <span class="price-old">
+              ${fmt(p.oldPrice)}
+            </span>
+
+            <span class="save-badge">
+              SAVE ${Math.round((1 - p.price / p.oldPrice) * 100)}%
+            </span>
+          `
+          : ""
+        }
+
+      </div>
+
+
+      <div class="size-label">
+        Size
+      </div>
+
+
+      <div class="size-row" id="size-row">
+
+        ${p.sizes.map(s => `
+
+          <button
+            class="size-btn ${s === selectedSize ? "active" : ""}"
+            data-size="${s}"
+          >
+            ${s}
+          </button>
+
+        `).join("")}
+
+      </div>
+
+
+      <div class="qty-add-row">
+
+        <div class="qty-box">
+
+          <button id="qty-minus">
+            −
+          </button>
+
+          <span id="qty-val">
+            ${qty}
+          </span>
+
+          <button id="qty-plus">
+            +
+          </button>
+
+        </div>
+
+
+        <button
+          class="btn btn-primary"
+          style="flex:1;"
+          id="add-btn"
+        >
+          Add to Cart
+        </button>
+
+
+        <button
+          class="wish-btn ${wished ? "active" : ""}"
+          id="wish-btn"
+          aria-label="Wishlist"
+        >
+          ♥
+        </button>
+
+      </div>
+
+
+      <div class="ship-info">
+
+        <span>
+          Free shipping over $50
+        </span>
+
+        <span>
+          Ships in 1–2 days
+        </span>
+
+      </div>
+
+
+      <div class="pd-tabs" id="pd-tabs">
+
+        <div
+          class="pd-tab ${activeTab === "Description" ? "active" : ""}"
+          data-tab="Description"
+        >
+          Description
+        </div>
+
+        <div
+          class="pd-tab ${activeTab === "Specifications" ? "active" : ""}"
+          data-tab="Specifications"
+        >
+          Specifications
+        </div>
+
+        <div
+          class="pd-tab ${activeTab === "Reviews" ? "active" : ""}"
+          data-tab="Reviews"
+        >
+          Reviews (${p.reviews})
+        </div>
+
+      </div>
+
+
+      <div
+        class="pd-tab-content"
+        id="pd-tab-content"
+      ></div>
+
+    </div>
+
+  `;
+
+
+  bindDetailEvents();
+  renderTabContent();
+
+}
+
+
+/* ================================
+   TAB CONTENT
+================================ */
+
+function renderTabContent() {
+
+  const el =
+    document.getElementById("pd-tab-content");
+
+
+  if (activeTab === "Description") {
+
+    el.textContent = p.detail;
+
+  }
+
+  else if (activeTab === "Specifications") {
+
+    el.innerHTML = `
+      Category: ${p.category}<br>
+      Available sizes: ${p.sizes.join(", ")}<br>
+      Rating: ${p.rating} / 5
+    `;
+
+  }
+
+  else {
+
+    el.textContent =
+      `${p.reviews} athletes have reviewed this product with an average rating of ${p.rating} out of 5 stars.`;
+
+  }
+
+}
+
+
+/* ================================
+   EVENTS
+================================ */
+
+function bindDetailEvents() {
+
+
+  document
+    .getElementById("size-row")
+    .addEventListener("click", (e) => {
+
+      const btn =
+        e.target.closest(".size-btn");
+
+      if (!btn) return;
+
+      selectedSize =
+        btn.dataset.size;
+
+      document
+        .querySelectorAll(".size-btn")
+        .forEach(b =>
+          b.classList.remove("active")
+        );
+
+      btn.classList.add("active");
+
+    });
+
+
+  document
+    .getElementById("qty-minus")
+    .onclick = () => {
+
+      qty = Math.max(1, qty - 1);
+
+      document.getElementById(
+        "qty-val"
+      ).textContent = qty;
+
+    };
+
+
+  document
+    .getElementById("qty-plus")
+    .onclick = () => {
+
+      qty += 1;
+
+      document.getElementById(
+        "qty-val"
+      ).textContent = qty;
+
+    };
+
+
+  document
+    .getElementById("wish-btn")
+    .onclick = (e) => {
+
+      wished = toggleWishlist(p.id);
+
+      e.target.classList.toggle(
+        "active",
+        wished
+      );
+
+    };
+
+
+  document
+    .getElementById("add-btn")
+    .onclick = (e) => {
+
+      addToCart(
+        p.id,
+        qty,
+        selectedSize
+      );
+
+      e.target.textContent =
+        "Added to Cart ✓";
+
+      setTimeout(() => {
+
+        e.target.textContent =
+          "Add to Cart";
+
+      }, 1400);
+
+    };
+
+
+  document
+    .getElementById("pd-tabs")
+    .addEventListener("click", (e) => {
+
+      const tab =
+        e.target.closest(".pd-tab");
+
+      if (!tab) return;
+
+      activeTab =
+        tab.dataset.tab;
+
+      document
+        .querySelectorAll(".pd-tab")
+        .forEach(t =>
+          t.classList.remove("active")
+        );
+
+      tab.classList.add("active");
+
+      renderTabContent();
+
+    });
+
+
+  /* IMAGE THUMBNAILS */
+
+  document
+    .querySelectorAll(".thumb")
+    .forEach(t => {
+
+      t.addEventListener("click", () => {
+
+        document
+          .querySelectorAll(".thumb")
+          .forEach(x =>
+            x.classList.remove("active")
+          );
+
+        t.classList.add("active");
+
+        const image =
+          t.querySelector("img");
+
+        document
+          .getElementById(
+            "main-product-image"
+          )
+          .src = image.src;
+
+      });
+
+    });
+
+}
+
+
+renderDetail();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wishlist — SportsHub</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header" id="site-header"></header>
+
+<main>
+  <div class="wrap cart-wrap">
+    <div class="cart-title-row">
+      <p class="eyebrow" id="wish-count-label">Saved Items</p>
+      <h1>Your Wishlist</h1>
+      <div class="breadcrumb"><a href="index.html">Home</a> / <a href="shop.html">Shop</a> / <strong>Wishlist</strong></div>
+    </div>
+
+    <div class="items-panel">
+      <div class="items-panel-head">
+        <h3>Saved Products</h3>
+        <span id="wish-products-count-label">0 products</span>
+      </div>
+      <div id="wish-items"></div>
+      <a href="shop.html" class="continue-link">&larr; Continue Shopping</a>
+    </div>
+  </div>
+</main>
+
+<footer class="footer" id="site-footer"></footer>
+
+<script src="script.js"></script>
+<script>
+  renderHeader("Wishlist");
+  renderFooter();
+
+  function renderWishlist(){
+    const products = wishlistProducts();
+    const itemsEl = document.getElementById("wish-items");
+    document.getElementById("wish-products-count-label").textContent = products.length + (products.length === 1 ? " product" : " products");
+    document.getElementById("wish-count-label").textContent = products.length + (products.length === 1 ? " ITEM SAVED" : " ITEMS SAVED");
+
+    if (products.length === 0){
+      itemsEl.innerHTML = `<div class="empty-cart">
+        <p>Your wishlist is empty.</p>
+        <a href="shop.html" class="btn btn-primary" style="margin-top:14px;">Browse Products</a>
+      </div>`;
+      return;
+    }
+
+    itemsEl.innerHTML = products.map(p => `
+      <div class="cart-row">
+        <a href="${p.id === 'basketball' ? 'product.html' : `product.html?id=${p.id}`}" class="cart-thumb">
+          <img src="images/${p.icon}.jpg" alt="${p.name}" class="prod-img">
+        </a>
+        <div class="cart-item-info">
+          <div class="cart-item-cat">${p.category}</div>
+          <div class="cart-item-name"><a href="${p.id === 'basketball' ? 'product.html' : `product.html?id=${p.id}`}" style="color:inherit;">${p.name}</a></div>
+          <div class="cart-item-meta">${fmt(p.price)}</div>
+          <button class="remove-link" onclick="removeFromWishlist('${p.id}'); renderWishlist();">Remove</button>
+        </div>
+        <div class="cart-item-right">
+          <button class="btn btn-primary btn-sm" onclick="addToCart('${p.id}',1,null); this.textContent='Added ✓'; setTimeout(()=>{this.textContent='Add to Cart';},1200);">Add to Cart</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  renderWishlist();
+</script>
+</body>
+</html>

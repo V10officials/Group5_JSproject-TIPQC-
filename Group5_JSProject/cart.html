@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Shopping Cart — SportsHub</title>
+
+  <link rel="stylesheet" href="styles.css">
+
+</head>
+
+
+<body>
+
+
+  <header class="site-header" id="site-header"></header>
+
+
+  <main>
+
+    <div class="wrap cart-wrap">
+
+
+      <div class="cart-title-row">
+
+        <p class="eyebrow" id="items-ready-label">
+          Items Ready
+        </p>
+
+        <h1>
+          Shopping Cart
+        </h1>
+
+        <div class="breadcrumb">
+
+          <a href="index.html">
+            Home
+          </a>
+
+          /
+
+          <a href="shop.html">
+            Shop
+          </a>
+
+          /
+
+          <strong>
+            Cart
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="cart-grid">
+
+
+        <!-- CART ITEMS -->
+
+        <div class="items-panel">
+
+          <div class="items-panel-head">
+
+            <h3>
+              Your Items
+            </h3>
+
+            <span id="products-count-label">
+              0 products
+            </span>
+
+          </div>
+
+
+          <div id="cart-items"></div>
+
+
+          <a href="shop.html" class="continue-link">
+            &larr; Continue Shopping
+          </a>
+
+        </div>
+
+
+
+        <!-- ORDER SUMMARY -->
+
+        <div class="summary-panel">
+
+          <h3 style="
+            font-family:var(--font-body);
+            font-size:18px;
+            margin-bottom:16px;
+          ">
+            Order Summary
+          </h3>
+
+
+          <!-- SUBTOTAL -->
+
+          <div class="summary-row">
+
+            <span>
+              Subtotal
+            </span>
+
+            <span id="sum-subtotal">
+              $0.00
+            </span>
+
+          </div>
+
+
+          <!-- SHIPPING -->
+
+          <div class="summary-row">
+
+            <span>
+              Shipping
+            </span>
+
+            <span id="sum-shipping">
+              $0.00
+            </span>
+
+          </div>
+
+
+          <!-- TAX -->
+
+          <div class="summary-row">
+
+            <span>
+              Estimated Tax
+            </span>
+
+            <span id="sum-tax">
+              $0.00
+            </span>
+
+          </div>
+
+
+          <!-- DISCOUNT -->
+
+          <div class="summary-row" id="discount-row" style="display:none;">
+
+            <span>
+              Discount
+            </span>
+
+            <span id="sum-discount">
+              -$0.00
+            </span>
+
+          </div>
+
+
+          <!-- TOTAL -->
+
+          <div class="summary-row total">
+
+            <span>
+              Total
+            </span>
+
+            <span id="sum-total">
+              $0.00
+            </span>
+
+          </div>
+
+
+          <!-- PROMO CODE -->
+
+          <div class="promo-row">
+
+            <input type="text" placeholder="Promo code" id="promo-input">
+
+            <button id="promo-apply">
+              Apply
+            </button>
+
+          </div>
+
+
+          <div id="promo-message" style="
+            font-size:12px;
+            margin-top:8px;
+            color:var(--text-muted);
+          "></div>
+
+
+          <!-- CHECKOUT -->
+
+          <a href="checkout.html" class="btn btn-primary btn-block">
+            Proceed to Checkout &rarr;
+          </a>
+
+
+          <div class="secure-note">
+
+            Secure checkout · Free returns within 30 days
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <footer class="footer" id="site-footer"></footer>
+
+
+  <script src="script.js"></script>
+
+
+  <script>
+
+    renderHeader("Shop");
+    renderFooter();
+
+
+    /* =========================================================
+       PROMO SETTINGS
+    ========================================================= */
+
+    let promoApplied = false;
+
+    const PROMO_CODE = "RENE";
+
+    const DISCOUNT_RATE = 0.20;
+
+
+    /* =========================================================
+       CART IMAGE
+    ========================================================= */
+
+    function getCartImage(product) {
+
+      if (product.id === "basketball") {
+
+        return "Basketballs/ball1.png";
+
+      }
+
+      if (product.id === "jersey") {
+
+        return "Jerseys/jersey1.png";
+
+      }
+
+      if (product.id === "shoes") {
+
+        return "Shoes/shoes1.png";
+
+      }
+
+      if (product.id === "gear") {
+
+        return "Gears/gear1.png";
+
+      }
+
+      return "";
+
+    }
+
+
+    /* =========================================================
+       RENDER CART
+    ========================================================= */
+
+    function renderCart() {
+
+      const lines =
+        cartLines();
+
+
+      const itemsEl =
+        document.getElementById(
+          "cart-items"
+        );
+
+
+      /* PRODUCT COUNT */
+
+      document.getElementById(
+        "products-count-label"
+      ).textContent =
+
+        lines.length +
+        (
+          lines.length === 1
+            ? " product"
+            : " products"
+        );
+
+
+      /* ITEMS READY */
+
+      const count =
+        cartCount();
+
+
+      document.getElementById(
+        "items-ready-label"
+      ).textContent =
+
+        count +
+        (
+          count === 1
+            ? " ITEM READY"
+            : " ITEMS READY"
+        );
+
+
+      /* =======================================================
+         EMPTY CART
+      ======================================================= */
+
+      if (lines.length === 0) {
+
+        itemsEl.innerHTML = `
+
+      <div class="empty-cart">
+
+        <p>
+          Your cart is empty.
+        </p>
+
+        <a
+          href="shop.html"
+          class="btn btn-primary"
+          style="margin-top:14px;"
+        >
+          Start Shopping
+        </a>
+
+      </div>
+
+    `;
+
+      }
+
+
+      /* =======================================================
+         CART PRODUCTS
+      ======================================================= */
+
+      else {
+
+        itemsEl.innerHTML =
+
+          lines.map(
+            l => `
+
+          <div class="cart-row">
+
+
+            <!-- PRODUCT IMAGE -->
+
+            <div class="cart-thumb">
+
+              <img
+                src="${getCartImage(l.product)}"
+                alt="${l.product.name}"
+                class="prod-img"
+              >
+
+            </div>
+
+
+            <!-- PRODUCT INFO -->
+
+            <div class="cart-item-info">
+
+              <div class="cart-item-cat">
+                ${l.product.category}
+              </div>
+
+
+              <div class="cart-item-name">
+                ${l.product.name}
+              </div>
+
+
+              <div class="cart-item-meta">
+
+                ${l.size
+                ? `Size ${l.size}`
+                : ""
+              }
+
+              </div>
+
+
+              <button
+                class="remove-link"
+                onclick="
+                  removeFromCart(
+                    '${l.id}',
+                    ${l.size
+                ? `'${l.size}'`
+                : null
+              }
+                  );
+
+                  renderCart();
+                "
+              >
+                Remove
+              </button>
+
+
+            </div>
+
+
+            <!-- QUANTITY / PRICE -->
+
+            <div class="cart-item-right">
+
+
+              <div class="qty-box">
+
+
+                <button
+                  onclick="
+                    setQty(
+                      '${l.id}',
+                      ${l.size
+                ? `'${l.size}'`
+                : null
+              },
+                      ${l.qty - 1}
+                    );
+
+                    renderCart();
+                  "
+                >
+                  −
+                </button>
+
+
+                <span>
+                  ${l.qty}
+                </span>
+
+
+                <button
+                  onclick="
+                    setQty(
+                      '${l.id}',
+                      ${l.size
+                ? `'${l.size}'`
+                : null
+              },
+                      ${l.qty + 1}
+                    );
+
+                    renderCart();
+                  "
+                >
+                  +
+                </button>
+
+
+              </div>
+
+
+              <span class="each-price">
+
+                ${fmt(l.product.price)} each
+
+              </span>
+
+
+              <span class="line-total">
+
+                ${fmt(
+                l.product.price *
+                l.qty
+              )
+              }
+
+              </span>
+
+
+            </div>
+
+
+          </div>
+
+        `
+          ).join("");
+
+      }
+
+
+      /*  CALCULATIONS */
+
+      const subtotal =
+        cartSubtotal();
+
+
+      /* 20% OFF WITH RENE */
+
+      const discount =
+        promoApplied
+          ? subtotal * DISCOUNT_RATE
+          : 0;
+
+
+      const discountedSubtotal =
+        subtotal - discount;
+
+
+      /* SHIPPING */
+
+      const shipping =
+        discountedSubtotal === 0
+
+          ? 0
+
+          : (
+            discountedSubtotal > 100
+              ? 0
+              : 6.99
+          );
+
+
+      /* TAX */
+
+      const tax =
+        discountedSubtotal * 0.08;
+
+
+      /* FINAL TOTAL */
+
+      const total =
+        discountedSubtotal +
+        shipping +
+        tax;
+
+
+      /* DISPLAY TOTALS */
+
+      document.getElementById(
+        "sum-subtotal"
+      ).textContent =
+        fmt(subtotal);
+
+
+      document.getElementById(
+        "sum-shipping"
+      ).textContent =
+
+        shipping === 0
+          ? "Free"
+          : fmt(shipping);
+
+
+      document.getElementById(
+        "sum-tax"
+      ).textContent =
+        fmt(tax);
+
+
+      /* DISCOUNT DISPLAY */
+
+      document.getElementById(
+        "discount-row"
+      ).style.display =
+
+        promoApplied && discount > 0
+          ? "flex"
+          : "none";
+
+
+      document.getElementById(
+        "sum-discount"
+      ).textContent =
+        "-" + fmt(discount);
+
+
+      /* TOTAL */
+
+      document.getElementById(
+        "sum-total"
+      ).textContent =
+        fmt(total);
+
+    }
+
+
+    /* Promo Code Button */
+
+    document
+      .getElementById("promo-apply")
+      .addEventListener(
+        "click",
+        () => {
+
+
+          const input =
+            document.getElementById(
+              "promo-input"
+            );
+
+
+          const btn =
+            document.getElementById(
+              "promo-apply"
+            );
+
+
+          const message =
+            document.getElementById(
+              "promo-message"
+            );
+
+
+          const code =
+            input.value
+              .trim()
+              .toUpperCase();
+
+
+          /* Correct PromoCode */
+
+          if (code === PROMO_CODE) {
+
+
+            promoApplied = true;
+
+
+            btn.textContent =
+              "Applied ✓";
+
+
+            message.textContent =
+              "RENE applied — 20% off!";
+
+
+            message.style.color =
+              "var(--accent)";
+
+
+            renderCart();
+
+
+          }
+
+
+          /* Invalid PromoCode*/
+
+          else {
+
+
+            promoApplied = false;
+
+
+            btn.textContent =
+              "Apply";
+
+
+            message.textContent =
+              "Invalid promo code.";
+
+
+            message.style.color =
+              "var(--text-muted)";
+
+
+            renderCart();
+
+          }
+
+        }
+      );
+
+
+    /* =========================================================
+       START
+    ========================================================= */
+
+    renderCart();
+
+  </script>
+
+
+</body>
+
+</html>

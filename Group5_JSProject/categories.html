@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop by Category — SportsHub</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<header class="site-header" id="site-header"></header>
+
+<main>
+
+  <div class="wrap" style="padding-top:44px;">
+    <p class="eyebrow">Browse By</p>
+
+    <h1 style="font-size:36px;margin-bottom:10px;">
+      Shop by Category
+    </h1>
+
+    <p style="color:var(--text-muted);">
+      Find your gear faster — jump straight to the section built for your sport.
+    </p>
+  </div>
+
+
+  <div class="wrap category-grid" id="category-grid"></div>
+
+</main>
+
+
+<footer class="footer" id="site-footer"></footer>
+
+
+<script src="script.js"></script>
+
+<script>
+
+  renderHeader("Categories");
+  renderFooter();
+
+
+  /* CATEGORY IMAGES */
+  function getCategoryImage(category) {
+
+    if (category === "Basketballs") {
+      return "Basketballs/ball1.png";
+    }
+
+    if (category === "Jerseys") {
+      return "Jerseys/jersey1.png";
+    }
+
+    if (category === "Shoes") {
+      return "Shoes/shoes1.png";
+    }
+
+    if (category === "Sports Gear") {
+      return "Gears/gear1.png";
+    }
+
+    return "";
+
+  }
+
+
+  /* ONLY SHOW CATEGORIES WITH IMAGES */
+  const categories = CATEGORY_META.filter(c =>
+    c.name === "Basketballs" ||
+    c.name === "Jerseys" ||
+    c.name === "Shoes" ||
+    c.name === "Sports Gear"
+  );
+
+
+  document.getElementById("category-grid").innerHTML =
+    categories.map((c, i) => `
+
+      <a
+        href="shop.html"
+        style="display:contents;"
+      >
+
+        <div class="category-card">
+
+          <div class="card-img ${i % 2 === 0 ? 'bg-a' : 'bg-b'}">
+
+            <img
+              src="${getCategoryImage(c.name)}"
+              alt="${c.name}"
+              class="prod-img"
+              style="width:100%;height:100%;object-fit:contain;"
+            >
+
+          </div>
+
+
+          <div class="card-body">
+
+            <h3>${c.name}</h3>
+
+            <p>${c.count} products</p>
+
+          </div>
+
+        </div>
+
+      </a>
+
+    `).join("");
+
+</script>
+
+</body>
+</html>

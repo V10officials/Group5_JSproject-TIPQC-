@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SportsHub — Sports Equipment</title>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<header class="site-header" id="site-header"></header>
+
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+
+    <div class="wrap">
+
+      <p class="eyebrow">
+        SPORTS EQUIPMENT
+      </p>
+
+      <h1>
+        Gear up.<br>
+        Play harder.
+      </h1>
+
+      <p>
+        Quality sports equipment built for athletes who want
+        to train harder, play better, and perform at their best.
+      </p>
+
+      <div class="hero-actions">
+
+        <a href="signup.html" class="btn btn-primary">
+          Shop Now
+        </a>
+
+        <a href="categories.html" class="btn btn-outline">
+          Browse Categories
+        </a>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- FEATURED PRODUCTS -->
+  <section class="section-pad">
+
+    <div class="wrap">
+
+      <div class="section-head">
+
+        <div>
+          <p class="eyebrow">
+            FEATURED
+          </p>
+
+          <h2>
+            Featured Gear
+          </h2>
+        </div>
+
+        <a href="shop.html" class="view-all">
+          View All →
+        </a>
+
+      </div>
+
+
+      <div class="product-grid" id="featured-grid"></div>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<footer class="footer" id="site-footer"></footer>
+
+
+<script src="script.js"></script>
+
+<script>
+
+  renderHeader("Home");
+  renderFooter();
+
+
+  /* -----------------------------------------
+     FEATURED PRODUCTS
+     ----------------------------------------- */
+
+  const featured = [
+    getProduct("basketball"),
+    getProduct("jersey"),
+    getProduct("shoes"),
+    getProduct("gear")
+  ];
+
+
+  /* -----------------------------------------
+     PRODUCT IMAGES
+     ----------------------------------------- */
+
+  function getHomeImage(product) {
+
+    if (product.id === "basketball") {
+      return "Basketballs/ball1.png";
+    }
+
+    if (product.id === "jersey") {
+      return "Jerseys/jersey1.png";
+    }
+
+    if (product.id === "shoes") {
+      return "Shoes/shoes1.png";
+    }
+
+    if (product.id === "gear") {
+      return "Gears/gear1.png";
+    }
+
+    return "";
+
+  }
+
+
+  /* -----------------------------------------
+     DISPLAY FEATURED PRODUCTS
+     ----------------------------------------- */
+
+  document.getElementById("featured-grid").innerHTML =
+    featured.map((product, index) => `
+
+      <article class="card">
+
+        <a href="product.html?id=${product.id}">
+
+          <div class="card-img ${index % 2 === 0 ? "bg-a" : "bg-b"}">
+
+            <img
+              src="${getHomeImage(product)}"
+              alt="${product.name}"
+              class="prod-icon home-product-image"
+            >
+
+          </div>
+
+        </a>
+
+
+        <div class="card-body">
+
+          <div class="card-title">
+            ${product.name}
+          </div>
+
+
+          <div class="card-footer">
+
+            <span class="price-tag">
+              ${fmt(product.price)}
+            </span>
+
+
+            <button
+              class="add-cart-btn"
+              onclick="addHomeProduct('${product.id}')"
+            >
+              Add to Cart
+            </button>
+
+          </div>
+
+        </div>
+
+      </article>
+
+    `).join("");
+
+
+  /* -----------------------------------------
+     ADD TO CART
+     ----------------------------------------- */
+
+  function addHomeProduct(id) {
+
+    const product = getProduct(id);
+
+    if (!product) return;
+
+    const size =
+      product.sizes && product.sizes.length
+        ? product.sizes[0]
+        : "One Size";
+
+    addToCart(id, 1, size);
+
+  }
+
+</script>
+
+</body>
+</html>

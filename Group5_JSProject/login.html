@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log In — SportsHub</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header" id="site-header"></header>
+
+<main>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <a href="index.html" class="logo">
+        <span class="logo-badge">SH</span>
+        <span class="logo-text">Sports<span class="accent">Hub</span></span>
+      </a>
+      <h1>Welcome back</h1>
+      <p class="sub">Log in to check out faster and track your orders.</p>
+
+      <form id="login-form">
+        <div class="auth-field">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="user@email.com" required>
+        </div>
+        <div class="auth-field">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" required minlength="6">
+        </div>
+        <p class="auth-error" id="login-error">Enter a valid email and a password of at least 6 characters.</p>
+        <button type="submit" class="btn btn-primary btn-block">Log In</button>
+
+        <a href="forgotpassword.html" class="btn btn-outline btn-block" style="margin-top:12px;">
+          Forgot Password?
+        </a>
+      </form>
+
+      <p class="auth-switch">Don't have an account? <a href="signup.html">Sign up</a></p>
+    </div>
+  </div>
+</main>
+
+<footer class="footer" id="site-footer"></footer>
+
+<script src="script.js"></script>
+<script src="function.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout — SportsHub</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header" id="site-header"></header>
+
+<main>
+  <div class="wrap checkout-wrap">
+    <p class="eyebrow">Step 3 of 3</p>
+    <h1 style="font-size:32px;">Checkout</h1>
+    <div class="checkout-steps">
+      <span class="step">Cart</span><span class="line"></span>
+      <span class="step">Shipping</span><span class="line"></span>
+      <span class="step active">Payment</span>
+    </div>
+
+    <div class="checkout-grid">
+      <div class="panel">
+        <h3>Shipping Address</h3>
+        <div class="two-col">
+          <div class="field-sm"><label>First Name</label><input type="text" placeholder="Name"></div>
+          <div class="field-sm"><label>Last Name</label><input type="text" placeholder="Surname"></div>
+        </div>
+        <div class="field-sm"><label>Address</label><input type="text" placeholder="Address"></div>
+        <div class="two-col">
+          <div class="field-sm"><label>City</label><input type="text" placeholder="City"></div>
+          <div class="field-sm"><label>State</label><input type="text" placeholder="State"></div>
+        </div>
+        <div class="two-col">
+          <div class="field-sm"><label>Zip Code</label><input type="text" placeholder="Zipcode"></div>
+          <div class="field-sm"><label>Phone</label><input type="text" placeholder="(63+) 09123456"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel" style="margin-bottom:22px;">
+          <h3>Shipping Method</h3>
+          <div class="ship-method active" id="ship-standard">
+            <div class="left"><span class="radio-dot filled"></span>Standard (3-5 days)</div>
+            <span>Free</span>
+          </div>
+          <div class="ship-method" id="ship-express">
+            <div class="left"><span class="radio-dot"></span>Express (1-2 days)</div>
+            <span>14.99</span>
+          </div>
+        </div>
+        <div class="panel" style="margin-bottom:22px;">
+          <h3>Payment Method</h3>
+          <div class="ship-method active" id="pay-card">
+            <div class="left"><span class="radio-dot filled"></span>Credit / Debit Card</div>
+          </div>
+          <div class="ship-method" id="pay-cash">
+            <div class="left"><span class="radio-dot"></span>Cash on Delivery</div>
+          </div>
+        </div>
+        <div class="panel" id="payment-details-panel">
+          <h3>Payment Details</h3>
+          <div class="field-sm"><label>Card Number</label><input type="text" placeholder="•••• •••• •••• 4242"></div>
+          <div class="two-col">
+            <div class="field-sm"><label>Expiry</label><input type="text" placeholder="MM / YY"></div>
+            <div class="field-sm"><label>CVC</label><input type="text" placeholder="123"></div>
+          </div>
+        </div>
+        <div class="panel" id="cash-note-panel" style="display:none;">
+          <h3>Cash on Delivery</h3>
+          <p style="color:var(--text-muted);font-size:14px;margin:0;">Pay in cash when your order arrives. Please have the exact amount ready for the rider.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Order Summary</h3>
+        <div class="order-summary-list" id="order-summary-list"></div>
+        <div class="summary-row"><span>Subtotal</span><span id="co-subtotal">$0.00</span></div>
+        <div class="summary-row"><span>Shipping</span><span id="co-shipping">Free</span></div>
+        <div class="summary-row"><span>Tax</span><span id="co-tax">$0.00</span></div>
+        <div class="summary-row total"><span>Total</span><span id="co-total">$0.00</span></div>
+        <button class="btn btn-primary btn-block" id="place-order-btn" style="margin-top:16px;">Place Order</button>
+        <div class="secure-note">🔒 Secure checkout, encrypted end to end.</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer" id="site-footer"></footer>
+
+<script src="script.js"></script>
+<script>
+  renderHeader("Shop");
+  renderFooter();
+
+  let expressShipping = false;
+  let paymentMethod = "card";
+
+  document.getElementById("ship-standard").addEventListener("click", () => setShip(false));
+  document.getElementById("ship-express").addEventListener("click", () => setShip(true));
+  function setShip(express){
+    expressShipping = express;
+    document.getElementById("ship-standard").classList.toggle("active", !express);
+    document.getElementById("ship-express").classList.toggle("active", express);
+    document.querySelector("#ship-standard .radio-dot").classList.toggle("filled", !express);
+    document.querySelector("#ship-express .radio-dot").classList.toggle("filled", express);
+    renderSummary();
+  }
+
+  document.getElementById("pay-card").addEventListener("click", () => setPayment("card"));
+  document.getElementById("pay-cash").addEventListener("click", () => setPayment("cash"));
+  function setPayment(method){
+    paymentMethod = method;
+    const isCash = method === "cash";
+    document.getElementById("pay-card").classList.toggle("active", !isCash);
+    document.getElementById("pay-cash").classList.toggle("active", isCash);
+    document.querySelector("#pay-card .radio-dot").classList.toggle("filled", !isCash);
+    document.querySelector("#pay-cash .radio-dot").classList.toggle("filled", isCash);
+    document.getElementById("payment-details-panel").style.display = isCash ? "none" : "block";
+    document.getElementById("cash-note-panel").style.display = isCash ? "block" : "none";
+  }
+
+  function renderSummary(){
+    const lines = cartLines();
+    const listEl = document.getElementById("order-summary-list");
+    if (lines.length === 0){
+      listEl.innerHTML = `<p style="color:var(--text-muted);font-size:14px;">Your cart is empty.</p>`;
+    } else {
+      listEl.innerHTML = lines.map(l => `
+        <div class="os-item">
+          <div class="os-thumb">${ICONS[l.product.icon]}</div>
+          <div class="os-name">${l.product.name} &times; ${l.qty}</div>
+          <div class="os-price">${fmt(l.product.price * l.qty)}</div>
+        </div>
+      `).join("");
+    }
+    const subtotal = cartSubtotal();
+    const shipping = subtotal === 0 ? 0 : (expressShipping ? 14.99 : 0);
+    const tax = subtotal * 0.08;
+    const total = subtotal + shipping + tax;
+
+    document.getElementById("co-subtotal").textContent = fmt(subtotal);
+    document.getElementById("co-shipping").textContent = shipping === 0 ? "Free" : fmt(shipping);
+    document.getElementById("co-tax").textContent = fmt(tax);
+    document.getElementById("co-total").textContent = fmt(total);
+  }
+
+  document.getElementById("place-order-btn").addEventListener("click", () => {
+    if (cartLines().length === 0){ alert("Your cart is empty — add something before placing an order."); return; }
+    saveCart([]);
+    document.querySelector(".checkout-wrap").innerHTML = `
+      <div style="text-align:center;padding:80px 20px;">
+        <p class="eyebrow">Order Confirmed</p>
+        <h1 style="font-size:32px;margin-bottom:14px;">Thanks — your gear is on the way 🏀</h1>
+        <p style="color:var(--text-muted);margin-bottom:26px;">${paymentMethod === "cash" ? "Have cash ready for the rider on delivery." : "A confirmation email is on its way to your inbox."}</p>
+        <a href="index.html" class="btn btn-primary">Back to Home</a>
+      </div>`;
+  });
+
+  renderSummary();
+</script>
+</body>
+</html>
